@@ -85,25 +85,41 @@ void limparBuffer() {
 }
 
 void aguardarTecla() {
-    int c;
+    struct termios oldt, newt;
+    int ch;
+
+    tcgetattr(STDIN_FILENO, &oldt);
+    newt = oldt;
+
+    newt.c_lflag &= ~(ICANON | ECHO);
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+
     printf("Pressione qualquer tecla para voltar ao menu principal...\n");
 
-    do {
-        c = getchar();
-    } while (c != '\n' && c != EOF);
+    ch = getchar();
 
-    getchar();
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
 }
 
 void aguardarTeclaSaida() {
-    int c;
+    struct termios oldt, newt;
+    int ch;
+
+    // Salvar as configurações atuais do terminal
+    tcgetattr(STDIN_FILENO, &oldt);
+    newt = oldt;
+
+    // Desativar o modo canônico e a exibição de entrada (ECHO)
+    newt.c_lflag &= ~(ICANON | ECHO);
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+
     printf("Pressione qualquer tecla para sair...\n");
 
-    do {
-        c = getchar();
-    } while (c != '\n' && c != EOF);
+    // Capturar uma tecla
+    ch = getchar();
 
-    getchar();
+    // Restaurar as configurações originais do terminal
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
 }
 
 void textBox(char frase[]) {
@@ -195,7 +211,7 @@ void CadastroPizzas(char op1, Pizza pizza[], int *qtd) {
         for (int i = 0; i < MAX_INGREDIENTES; i++) {
             printf("                                       ➲ ");
             scanf(" %[^\n]", novapizza->ingredientes[i]);
-            if (strcmp(novapizza->ingredientes[i], "sair") == 0) {
+            if (strcmp(novapizza->ingredientes[i], "sair") == 0 || strcmp(novapizza->ingredientes[i], "SAIR") == 0) {
                 break;
             }
             novapizza->QtdIngredientes++;
@@ -384,7 +400,7 @@ void AlterarPizza(int qtd_pizzas, Pizza pizza[]) {
                     for (int i = 0; i < MAX_INGREDIENTES; i++) {
                         printf("                                       ➲ ");
                         scanf(" %[^\n]", novapizza->ingredientes[i]);
-                        if (strcmp(novapizza->ingredientes[i], "sair") == 0) {
+                        if (strcmp(novapizza->ingredientes[i], "sair") == 0 || strcmp(novapizza->ingredientes[i], "SAIR") == 0 || strcmp(novapizza->ingredientes[i], "Sair") == 0) {
                             break;
                         }
                         novapizza->QtdIngredientes++;
@@ -446,6 +462,7 @@ void DeletarPizza(int *qtd_pizzas, Pizza pizza[]) {
     }
 
     printf("\n                       ");
+    limparBuffer();
     aguardarTecla();
 }
 
@@ -478,6 +495,7 @@ void DetalharPizza(int qtd_pizzas, Pizza pizza[], int Qtd_Ingredientes) {
         textBox(TextoInicial);
         printf("                                    ❌ Pizza não encontrada ❌\n");
         printf("\n                       ");
+        limparBuffer();
         aguardarTecla();
         return;
     }
@@ -504,6 +522,7 @@ void DetalharPizza(int qtd_pizzas, Pizza pizza[], int Qtd_Ingredientes) {
     }
     printf("\n═══════════════════════════════════════════════════════════════════════════════════════════════════════\n");
     printf("\n                       ");
+    limparBuffer();
     aguardarTecla();
 }
 
@@ -573,5 +592,6 @@ int main() {
     printf("🍕  Até logo! 👋\n");
     printf("\n                                 ");
     aguardarTeclaSaida();
+    system("clear");
     return 0;
 }
