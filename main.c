@@ -200,6 +200,11 @@ void Menu(int selected) {
         printf("                                       REMOVER um um refrigerante\n");
 
     if (selected == 7)
+        printf("                                         "ORANGE_BG "🖨️  IMPRIMIR cardápio 🍕" RESET "\n");
+    else
+        printf("                                           IMPRIMIR cardápio\n");
+
+    if (selected == 8)
         printf("                                               "ORANGE_BG "👋 SAIR 🍕" RESET "\n");
     else
         printf("                                                 SAIR\n");
@@ -797,6 +802,79 @@ void DetalharPizza(int qtd_pizzas, Pizza pizza[], int Qtd_Ingredientes) {
     aguardarTecla();
 }
 
+void ImprimirCardapio(int qtd, Pizza pizza[], int qtd_refri, Refrigerante refri[]) {
+    FILE *f = fopen("CARDAPIO.txt", "w");
+    char TextoInicial[50] = {"  IMPRESSAO DE CARDAPIO      "};
+    textBox(TextoInicial);
+    printf("                                    Criando arquivo de texto\n                                          🍕\n");
+    sleep(1);
+    system("clear");
+    textBox(TextoInicial);
+    printf("                                    Criando arquivo de texto\n                                             🍕\n");
+    sleep(1);
+    system("clear");
+    textBox(TextoInicial);
+    printf("                                    Criando arquivo de texto\n                                                 🍕\n");
+    sleep(1);
+    if (f == NULL) {
+        printf("                             Erro ao criar arquivo de texto\n");
+        aguardarTecla();
+        return;
+    }
+    system("clear");
+    textBox(TextoInicial);
+    printf("                                Imprimindo cardápio no arquivo\n                                          🍕\n");
+    sleep(1);
+    system("clear");
+    textBox(TextoInicial);
+    printf("                                Imprimindo cardápio no arquivo\n                                             🍕\n");
+    sleep(1);
+    system("clear");
+    textBox(TextoInicial);
+    printf("                                Imprimindo cardápio no arquivo\n                                                 🍕\n");
+    sleep(1);
+    if (qtd <= 0) {
+        printf("\n              Sem sabores de pizza registrados!\n");
+        aguardarTecla();
+    } else {
+        fprintf(f,"╔═══════════════════════════════════════════════════════════════════════════╗\n");
+        fprintf(f,"║                                 CARDAPIO CRUDS PIZZARIA                                    ║\n");
+        fprintf(f,"╚═══════════════════════════════════════════════════════════════════════════╝\n");
+        fprintf(f,"═════════════════════════════════════════════════════════════════════════════\n");
+        fprintf(f,"                                           PIZZAS                          \n");
+        fprintf(f,"═════════════════════════════════════════════════════════════════════════════\n");
+        fprintf(f,"SABOR                           P                     M                        G\n");
+        fprintf(f,"═════════════════════════════════════════════════════════════════════════════\n");
+        for (int i = 0; i < qtd; i++) {
+            fprintf(f,"%-11s""┈┈┈┈┈┈┈┈┈┈┈┈┈", pizza[i].sabor);
+            fprintf(f,"┈┈┈┈┈┈ R$%-7.2f" "┈┈┈┈┈┈┈┈┈┈┈┈┈", pizza[i].valorP);
+            fprintf(f,"┈ R$%-7.2f" "┈┈┈┈┈┈┈┈┈┈┈┈┈", pizza[i].valorM);
+            fprintf(f,"┈┈┈┈ R$%-7.2f", pizza[i].valorG);
+            fprintf(f,"\n");
+        }
+        fprintf(f,"═════════════════════════════════════════════════════════════════════════════\n");
+        fprintf(f,"                                        REFRIGERANTES                          \n");
+        fprintf(f,"═════════════════════════════════════════════════════════════════════════════\n");
+        fprintf(f,"SABOR                         350ml                 600ml                      2L\n");
+        fprintf(f,"═════════════════════════════════════════════════════════════════════════════\n");
+        for (int i = 0; i < qtd_refri; i++) {
+            fprintf(f,"%-11s""┈┈┈┈┈┈┈┈┈┈┈┈┈", refri[i].sabor);
+            fprintf(f,"┈┈┈┈┈┈ R$%-7.2f" "┈┈┈┈┈┈┈┈┈┈┈┈┈", refri[i].valor350);
+            fprintf(f,"┈ R$%-7.2f" "┈┈┈┈┈┈┈┈┈┈┈┈┈", refri[i].valor600);
+            fprintf(f,"┈┈┈┈ R$%-7.2f", refri[i].valor2L);
+            fprintf(f,"\n");
+        }
+        fprintf(f,"═════════════════════════════════════════════════════════════════════════════\n");
+    }
+    fclose(f);
+    system("clear");
+    textBox(TextoInicial);
+    printf("                              ✅ Cardapio impresso com sucesso ✅\n                                          \n");
+    printf("                      ");
+    aguardarTecla();
+}
+    
+
 void EscolhaOpcao(int opcao, char *PontOp1, Pizza pizzas[], int *Pontqtdpizzas, Refrigerante refris[], int *Pontqtdrefri) {
     switch (opcao) {
         case 1:
@@ -827,6 +905,10 @@ void EscolhaOpcao(int opcao, char *PontOp1, Pizza pizzas[], int *Pontqtdpizzas, 
             system("clear");
             DeletarRefri(Pontqtdrefri, refris);
             break;
+        case 8:
+            system("clear");
+            ImprimirCardapio(*Pontqtdpizzas, pizzas, *Pontqtdrefri, refris);
+            break;
         default:
             break;
     }
@@ -841,7 +923,7 @@ int main() {
     Pizza cadastro[MAX_PIZZAS];
     Refrigerante cadastro_refri[MAX_REFRI];
     inicializarProdutos(cadastro, cadastro_refri);
-    while (selected != 8) {  
+    while (selected != 9) {  
         selected = 0;
         desativarBufferDeEntrada(); 
         while (1) {
@@ -855,7 +937,7 @@ int main() {
                         if (selected > 0) selected--;
                         break;
                     case DOWN_ARROW:
-                        if (selected < 7) selected++;
+                        if (selected < 8) selected++;
                         break;
                 }
             } else if (key == ENTER) {
