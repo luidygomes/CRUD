@@ -32,51 +32,134 @@ typedef struct {
     float valor2L;
 }Refrigerante;
 
+void textBox(char frase[]) {
+    int largura_caixa = 100;
 
-void inicializarProdutos(Pizza pizza[], Refrigerante refri[]){
-    strcpy(pizza[0].sabor, "Mussarela");
-    pizza[0].valorP = 28;
-    pizza[0].valorM = 36;
-    pizza[0].valorG = 40;
-    strcpy(pizza[0].ingredientes[0], "Molho");
-    strcpy(pizza[0].ingredientes[1], "Mussarela");
-    strcpy(pizza[0].ingredientes[2], "Tomate");
-    strcpy(pizza[0].ingredientes[3], "Azeitona");
-    strcpy(pizza[0].ingredientes[4], "Oregano");
-    pizza[0].QtdIngredientes = 5;
+    int len_frase = strlen(frase);
+    
+    int espacos_esquerda = (largura_caixa - len_frase) / 2;
+    
+    printf("╔");
+    for (int i = 0; i < largura_caixa+1; i++) printf("═");
+    printf("╗\n");
 
-    strcpy(pizza[1].sabor, "Portuguesa");
-    pizza[1].valorP = 33;
-    pizza[1].valorM = 40;
-    pizza[1].valorG = 46;
-    strcpy(pizza[1].ingredientes[0], "Molho");
-    strcpy(pizza[1].ingredientes[1], "Mussarela");
-    strcpy(pizza[1].ingredientes[2], "Presunto");
-    strcpy(pizza[1].ingredientes[3], "Calabresa");
-    strcpy(pizza[1].ingredientes[4], "Ovo");
-    strcpy(pizza[1].ingredientes[5], "Cebola");
-    strcpy(pizza[1].ingredientes[6], "Azeitona");
-    strcpy(pizza[1].ingredientes[7], "Oregano");
-    pizza[1].QtdIngredientes = 8;
+    printf("║");
+    for (int i = 0; i < espacos_esquerda; i++) printf(" ");
+    printf("\e[38;5;208m""%s", frase);
+    for (int i = 0; i < largura_caixa - len_frase - espacos_esquerda; i++) printf(" ");
+    printf(RESET" ║\n");
 
-    strcpy(pizza[2].sabor, "Frango");
-    pizza[2].valorP = 33;
-    pizza[2].valorM = 40;
-    pizza[2].valorG = 46;
-    strcpy(pizza[2].ingredientes[0], "Molho");
-    strcpy(pizza[2].ingredientes[1], "Mussarela");
-    strcpy(pizza[2].ingredientes[2], "Frango");
-    strcpy(pizza[2].ingredientes[3], "Bacon");
-    strcpy(pizza[2].ingredientes[4], "Milho");
-    strcpy(pizza[2].ingredientes[5], "Tomate");
-    strcpy(pizza[2].ingredientes[6], "Azeitona");
-    strcpy(pizza[2].ingredientes[7], "Oregano");
-    pizza[2].QtdIngredientes = 8;
+    printf("╚");
+    for (int i = 0; i < largura_caixa+1; i++) printf("═");
+    printf("╝\n");
+}
 
-    strcpy(refri[0].sabor, "Delrio");
-    refri[0].valor350 = 4;
-    refri[0].valor600 = 6;
-    refri[0].valor2L = 10;
+void aguardarTecla() {
+    struct termios oldt, newt;
+    int ch;
+
+    tcgetattr(STDIN_FILENO, &oldt);
+    newt = oldt;
+
+    newt.c_lflag &= ~(ICANON | ECHO);
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+
+    printf("Pressione qualquer tecla para voltar ao menu principal...\n");
+
+    ch = getchar();
+
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+}
+
+void BemVindo(){
+    char BemVindo[50] = {"BEM - VINDO(A) AO CRUD'S PIZZARIA"};
+    textBox(BemVindo);
+}
+
+void MensagemInicial() {
+    system("clear");
+    BemVindo();
+    printf("\n");
+    printf("                                        Carregando Dados...\n                                             🍕\n");
+    sleep(1);
+    system("clear");
+    BemVindo();
+    printf("\n");
+    printf("                                        Carregando Dados...\n                                                🍕\n");
+    printf("\n");
+    sleep(1);
+    system("clear");
+    BemVindo();
+    printf("\n");
+    printf("                                        Carregando Dados...\n                                                  🍕\n");
+    sleep(1);
+}
+
+void MensagemFinal() {
+    char Texto[50] = {"ENCERRAMENTO DE PROGRAMA"};
+    system("clear");
+    textBox(Texto);
+    printf("\n");
+    printf("                                          Salvando Dados...\n                                             🍕\n");
+    sleep(1);
+    system("clear");
+    textBox(Texto);
+    printf("\n");
+    printf("                                          Salvando Dados...\n                                                🍕\n");
+    printf("\n");
+    sleep(1);
+    system("clear");
+    textBox(Texto);
+    printf("\n");
+    printf("                                          Salvando Dados...\n                                                  🍕\n");
+    sleep(1);
+}
+
+void CarregarDados(Pizza pizza[], int *qtd_pizza, Refrigerante refri[], int *qtd_refri) {
+    FILE *f = fopen("cardapio.bin", "rb");
+    MensagemInicial();
+    if (f == NULL) {
+        system("clear");
+        BemVindo();
+        printf("                       ❌ Arquivo não encontrado. Iniciando com cardápio vazio. ❌\n");
+        printf("\n                        ");
+        aguardarTecla();
+        *qtd_pizza = 0;
+        *qtd_refri = 0;
+        return;
+    }
+
+    fread(qtd_pizza, sizeof(int), 1, f);
+    fread(qtd_refri, sizeof(int), 1, f);
+
+    fread(pizza, sizeof(Pizza), *qtd_pizza, f);
+    fread(refri, sizeof(Refrigerante), *qtd_refri, f);
+
+    fclose(f);
+    printf("Dados carregados com sucesso!\n");
+}
+
+void SalvarDados(Pizza pizza[], int qtd_pizza, Refrigerante refri[], int qtd_refri) {
+    FILE *f = fopen("cardapio.bin", "wb"); // Abre o arquivo para escrita binária
+
+    if (f == NULL) {
+        printf("Erro ao abrir o arquivo para salvar os dados.\n");
+        return;
+    }
+
+    fwrite(&qtd_pizza, sizeof(int), 1, f);
+    fwrite(&qtd_refri, sizeof(int), 1, f);
+
+    for (int i = 0; i < qtd_pizza; i++) {
+        fwrite(&pizza[i], sizeof(Pizza), 1, f);
+    }
+
+    for (int i = 0; i < qtd_refri; i++) {
+        fwrite(&refri[i], sizeof(Refrigerante), 1, f);
+    }
+
+    fclose(f);
+    printf("Dados salvos em formato binário com sucesso!\n");
 }
 
 void desativarBufferDeEntrada() {
@@ -96,23 +179,6 @@ void ativarBufferDeEntrada() {
 void limparBuffer() {
     int c;
     while ((c = getchar()) != '\n' && c != EOF);
-}
-
-void aguardarTecla() {
-    struct termios oldt, newt;
-    int ch;
-
-    tcgetattr(STDIN_FILENO, &oldt);
-    newt = oldt;
-
-    newt.c_lflag &= ~(ICANON | ECHO);
-    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-
-    printf("Pressione qualquer tecla para voltar ao menu principal...\n");
-
-    ch = getchar();
-
-    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
 }
 
 void aguardarTeclaSaida() {
@@ -136,33 +202,9 @@ void aguardarTeclaSaida() {
     tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
 }
 
-void textBox(char frase[]) {
-    int largura_caixa = 100;
-
-    int len_frase = strlen(frase);
-    
-    int espacos_esquerda = (largura_caixa - len_frase) / 2;
-    
-    printf("╔");
-    for (int i = 0; i < largura_caixa+1; i++) printf("═");
-    printf("╗\n");
-
-    printf("║");
-    for (int i = 0; i < espacos_esquerda; i++) printf(" ");
-    printf("\e[38;5;208m""%s", frase);
-    for (int i = 0; i < largura_caixa - len_frase - espacos_esquerda; i++) printf(" ");
-    printf(RESET" ║\n");
-
-    printf("╚");
-    for (int i = 0; i < largura_caixa+1; i++) printf("═");
-    printf("╝\n");
-}
-
 void Menu(int selected) {
     system("clear");
-    char BemVindo[50] = {"   BEM - VINDO(A) AO CRUD'S PIZZARIA"};
-
-    textBox(BemVindo);
+    BemVindo();
 
     if (selected == 0)
         printf("                                    "ORANGE_BG"🖥️  CADASTRAR um novo produto 🍕" RESET "\n");
@@ -262,12 +304,19 @@ void CadastroPizzas(char op1, Pizza pizza[], int *qtd, Refrigerante refri[], int
             printf("           Digite os ingredientes da pizza de %s um por um (para parar digite 'sair'): \n", novapizza->sabor);
             printf("\n");
             for (int i = 0; i < MAX_INGREDIENTES; i++) {
+                char ingredienteTemp[100]; // Variável temporária para ler o ingrediente
+
                 printf("                                       ➲ ");
-                scanf(" %[^\n]", novapizza->ingredientes[i]);
-                if (strcmp(novapizza->ingredientes[i], "sair") == 0 || strcmp(novapizza->ingredientes[i], "SAIR") == 0) {
-                    break;
+                scanf(" %[^\n]", ingredienteTemp);
+
+                // Verifica se o usuário quer parar
+                if (strcmp(ingredienteTemp, "sair") == 0 || strcmp(ingredienteTemp, "SAIR") == 0) {
+                    break; // Sai do loop se o usuário digitar "sair"
                 }
-                novapizza->QtdIngredientes++;
+
+                // Copia o ingrediente válido para a struct
+                strcpy(novapizza->ingredientes[i], ingredienteTemp);
+                novapizza->QtdIngredientes++; // Incrementa o contador de ingredientes
             }
             (*qtd)++;
         } else {
@@ -309,7 +358,7 @@ void ListarPizzas(int qtd, Pizza pizza[], int qtd_refri, Refrigerante refri[]) {
     char TextoInicial[50] = {"  CARDAPIO CRUD'S PIZZARIA      "};
     textBox(TextoInicial);
     if (qtd <= 0) {
-        printf("\n              Sem sabores de pizza registrados!\n");
+        printf("\n                                Sem sabores de pizza registrados!\n");
     } else {
         printf("═══════════════════════════════════════════════════════════════════════════════════════════════════════\n");
         printf("                                             PIZZAS                          \n");
@@ -485,12 +534,19 @@ void AlterarPizza(int qtd_pizzas, Pizza pizza[]) {
                     printf("Digite os novos ingredientes da pizza de %s um por um (para parar digite 'sair'): \n", novapizza->sabor);
                     novapizza->QtdIngredientes = 0;
                     for (int i = 0; i < MAX_INGREDIENTES; i++) {
+                        char ingredienteTemp[100]; // Variável temporária para ler o ingrediente
+
                         printf("                                       ➲ ");
-                        scanf(" %[^\n]", novapizza->ingredientes[i]);
-                        if (strcmp(novapizza->ingredientes[i], "sair") == 0 || strcmp(novapizza->ingredientes[i], "SAIR") == 0 || strcmp(novapizza->ingredientes[i], "Sair") == 0) {
-                            break;
+                        scanf(" %[^\n]", ingredienteTemp);
+
+                        // Verifica se o usuário quer parar
+                        if (strcmp(ingredienteTemp, "sair") == 0 || strcmp(ingredienteTemp, "SAIR") == 0) {
+                            break; // Sai do loop se o usuário digitar "sair"
                         }
-                        novapizza->QtdIngredientes++;
+
+                        // Copia o ingrediente válido para a struct
+                        strcpy(novapizza->ingredientes[i], ingredienteTemp);
+                        novapizza->QtdIngredientes++; // Incrementa o contador de ingredientes
                     }
                     break;
                 default:
@@ -787,13 +843,13 @@ void DetalharPizza(int qtd_pizzas, Pizza pizza[], int Qtd_Ingredientes) {
     printf("═══════════════════════════════════════════════════════════════════════════════════════════════════════\n");
     printf(ORANGE_TEXT"                                         INGREDIENTES \n"RESET);
     printf("═══════════════════════════════════════════════════════════════════════════════════════════════════════\n");
-
-    printf("%s", pizza[PosicaoPizza].ingredientes[0]);
+    Qtd_Ingredientes = pizza[PosicaoPizza].QtdIngredientes;
+    if (Qtd_Ingredientes > 0)
+        printf("%s", pizza[PosicaoPizza].ingredientes[0]);
 
     for (int i = 1; i < pizza[PosicaoPizza].QtdIngredientes; i++) {
-        if (i > 0) {
+        if (i > 0)
             printf(", ");
-        }
         printf("%s", pizza[PosicaoPizza].ingredientes[i]);
     }
     printf("\n═══════════════════════════════════════════════════════════════════════════════════════════════════════\n");
@@ -834,11 +890,13 @@ void ImprimirCardapio(int qtd, Pizza pizza[], int qtd_refri, Refrigerante refri[
     printf("                                Imprimindo cardápio no arquivo\n                                                 🍕\n");
     sleep(1);
     if (qtd <= 0) {
-        printf("\n              Sem sabores de pizza registrados!\n");
+        printf("\n                              Sem sabores de pizza registrados!\n");
+        printf("                      ");
         aguardarTecla();
+        return;
     } else {
         fprintf(f,"╔═══════════════════════════════════════════════════════════════════════════╗\n");
-        fprintf(f,"║                                 CARDAPIO CRUDS PIZZARIA                                    ║\n");
+        fprintf(f,"║                                 CARDAPIO CRUDS PIZZARIA                                               ║\n");
         fprintf(f,"╚═══════════════════════════════════════════════════════════════════════════╝\n");
         fprintf(f,"═════════════════════════════════════════════════════════════════════════════\n");
         fprintf(f,"                                           PIZZAS                          \n");
@@ -874,6 +932,17 @@ void ImprimirCardapio(int qtd, Pizza pizza[], int qtd_refri, Refrigerante refri[
     aguardarTecla();
 }
     
+void EncerramentoPrograma(){
+    char TextoInicial[50] = {"ENCERRAMENTO DE PROGRAMA"};
+    MensagemFinal();
+    system("clear");
+    textBox(TextoInicial);
+    printf("\n                                          ");
+    printf("🍕  Até logo! 👋\n");
+    printf("\n                                 ");
+    aguardarTeclaSaida();
+    system("clear");
+}    
 
 void EscolhaOpcao(int opcao, char *PontOp1, Pizza pizzas[], int *Pontqtdpizzas, Refrigerante refris[], int *Pontqtdrefri) {
     switch (opcao) {
@@ -915,14 +984,11 @@ void EscolhaOpcao(int opcao, char *PontOp1, Pizza pizzas[], int *Pontqtdpizzas, 
 }
 
 int main() {
-    int selected = 0;
-    char key;
-    int qtdpizzas = 3;
-    int qtdrefris = 1;
-    char op1 = 's';
+    int selected = 0, qtdpizzas = 3, qtdrefris = 1;
+    char key, op1 = 's';
     Pizza cadastro[MAX_PIZZAS];
     Refrigerante cadastro_refri[MAX_REFRI];
-    inicializarProdutos(cadastro, cadastro_refri);
+    CarregarDados(cadastro, &qtdpizzas, cadastro_refri, &qtdrefris);
     while (selected != 9) {  
         selected = 0;
         desativarBufferDeEntrada(); 
@@ -948,13 +1014,7 @@ int main() {
         ativarBufferDeEntrada();
         EscolhaOpcao(selected, &op1, cadastro, &qtdpizzas, cadastro_refri, &qtdrefris);
     }
-    char TextoInicial[50] = {"ENCERRAMENTO DE PROGRAMA"};
-    system("clear");
-    textBox(TextoInicial);
-    printf("\n                                          ");
-    printf("🍕  Até logo! 👋\n");
-    printf("\n                                 ");
-    aguardarTeclaSaida();
-    system("clear");
+    SalvarDados(cadastro, qtdpizzas, cadastro_refri, qtdrefris);
+    EncerramentoPrograma();
     return 0;
 }

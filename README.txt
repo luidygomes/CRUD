@@ -16,3 +16,9 @@ Compatibilidade:
 
 Sistemas Operacionais Compatíveis: Linux, macOS, e outros sistemas baseados em Unix.
 Sistemas Não Compatíveis: Windows. Se você deseja executar este projeto no Windows, será necessário portar as funcionalidades específicas do terminal utilizando APIs equivalentes como windows.h.
+
+AVISOS:
+
+Para salvar os dados, saia do programa corretamente (botão sair).
+O arquivo "cardapio.bin" guarda os dados do programa, portanto não modifique ou exclua ele.
+Ao utilizar a função de imprimir cardápio, será criado um novo arquivo de texto na pasta com as informações do cardápio.
